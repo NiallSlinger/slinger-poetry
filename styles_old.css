@@ -1,0 +1,72 @@
+@font-face {
+    font-family: '000WebFont';
+    src: url('000webfont.ttf') format('truetype');
+}
+
+body {
+    background-color: black;
+    color: white;
+    font-family: '000WebFont', sans-serif;
+    margin: 0;
+    overflow: hidden;
+    text-transform: lowercase;
+}
+
+/* CSS for welcome message and image */
+#welcome-text, #welcome-image {
+    position: fixed;
+    display: none; /* Initially hidden */
+    text-align: center;
+    top: 50%; /* Adjust as needed for vertical centering */
+    left: 50%; /* Adjust as needed for horizontal centering */
+    transform: translate(-50%, -50%); /* Center */
+    max-width: 100%; /* Ensure image responsiveness */
+}
+
+#main-wrapper {
+    display: none;
+}
+#main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+nav {
+    width: 100%;
+    background-color: black;
+    padding: 1em 0;
+    text-align: center;
+    position: fixed;
+    top: 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 1em;
+    font-size: 1.2em;
+}
+
+
+section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+img {
+    display: block;
+    margin: 20px auto;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+section {
+    padding: 100px 20px;
+    padding-top: 60px; /* Ensure content is not hidden behind the fixed nav */

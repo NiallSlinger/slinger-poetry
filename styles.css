@@ -1,0 +1,190 @@
+
+@font-face {
+  font-family: '000WebFont';
+  src: url('000webfont.woff2') format('woff2'),
+       url('000webfont.woff') format('woff'),
+       url('000webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* Base layout */
+body {
+    background-color: black;
+    color: white;
+    font-family: '000WebFont', sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-transform: lowercase;
+}
+
+/* Welcome text and image (intro sequence) */
+#welcome-text,
+#welcome-image {
+    position: fixed;
+    display: none;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 100%;
+    z-index: 9999;
+}
+
+/* Main wrapper hidden until intro finishes */
+#main-wrapper {
+    display: none;
+}
+
+/* Center main content */
+#main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Hero section */
+#hero {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: opacity 0.8s ease, transform 1s ease;
+}
+
+#hero.hidden {
+    opacity: 0;
+    transform: translateY(-50px);
+}
+
+/* Scrollable bordered section */
+#scroll-wrapper {
+  min-height: 200vh;
+  display: flex;
+  justify-content: center;
+  background-color: black;
+  padding-top: 50vh; /* was 100vh — brings it up halfway */
+}
+
+/* ───────────
+   WHITE BORDER FRAME
+   ─────────── */
+#border-frame {
+  position: relative;
+  width: 90%;
+  max-width: 1000px;
+  margin: 120px auto 60px auto;
+  border: 1px solid white;
+  background-color: black;
+  padding: 80px 40px;
+  box-sizing: border-box;
+  text-align: center;
+  min-height: 70vh;
+}
+
+/* keep everything inside white frame */
+#text-area {
+  color: white;
+  font-family: '000WebFont', sans-serif;
+  line-height: 1.6em;
+}
+
+/* link style */
+#text-area a {
+  color: white;
+  text-decoration: underline;
+}
+
+#text-area a:hover {
+  opacity: 0.7;
+}
+
+/* Navbar */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: black;
+  text-align: center;
+  padding: 1em 0;
+  z-index: 1000;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 1em;
+  font-size: 1.2em;
+  opacity: 1;
+}
+
+/* Prevent nav overlap */
+section {
+  margin-top: 100px;
+}
+
+#content-box {
+  width: 90%;
+  max-width: 1000px;
+  border: 1px solid white;
+  background-color: black;
+  padding: 80px 40px;
+  margin: 120px auto;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 1.6em;
+}
+
+/* login form styles */
+#login-form {
+  margin-top: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+}
+
+#login-form input {
+  background: black;
+  border: 1px solid white;
+  color: white;
+  padding: 0.8em;
+  width: 60%;
+  font-family: '000WebFont', sans-serif;
+  text-transform: lowercase;
+  text-align: center;
+}
+
+#login-form input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+#login-form button {
+  background: black;
+  border: 1px solid white;
+  color: white;
+  padding: 0.8em 2em;
+  cursor: pointer;
+  font-family: '000WebFont', sans-serif;
+  text-transform: lowercase;
+  transition: 0.2s;
+}
+
+#login-form button:hover {
+  background: white;
+  color: black;
+}
+
+#login-message {
+  margin-top: 1.5em;
+  color: white;
+  font-size: 1em;
+}
+
+

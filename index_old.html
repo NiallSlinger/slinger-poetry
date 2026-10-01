@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLINGER</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1 id="welcome-text">welcome to the other side of the abyss</h1>
+    <img id="welcome-image" src="image1.png" alt="Welcome Image">
+    <div id="main-wrapper"><div id="main-content">
+        <nav>
+            <a href="index.html">null</a>
+            <a href="projects.html">projects</a>
+            <a href="archive.html">archive</a>
+            <a href="broadcast.html">broadcast</a>
+            <a href="cells.html">cells</a>
+            <a href="poetry.html">poetry</a>
+            <a href="o.html">o</a>
+            <a href="entry.html">entry</a>
+        </nav>
+        <section>
+            <h1>important notice</h1>
+            <p>Welcome to my site. I am currently working on both the site itself and its content.</p>
+            <p>Thank you for your patience!</p>
+        </section>
+    </div></div>
+    <script>
+    $(function() {
+      $('#welcome-text').fadeIn(2000, ()=>
+        $('#welcome-text').fadeOut(2000, ()=>
+          $('#welcome-image').fadeIn(2000, ()=>
+            $('#welcome-image').fadeOut(2000, ()=>
+              $('#main-wrapper').fadeIn(2000)
+            )
+          )
+        )
+      );
+    });
+    </script>
+
+    <script>
+let titleText = "NIALL_SLINGER_NEOCITIES_";
+setInterval(() => {
+  titleText = titleText.substring(1) + titleText[0];
+  document.title = titleText;
+}, 250);
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLINGER - poetry broadcast</title>
+    
+    <!-- CSP HEADER: CLEAN ALLOWLIST -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src 'self' https://*.supabase.co https://zndzqourlurmfjljjwgt.supabase.co wss://*.supabase.co data: blob:;">
+    
+    <link rel="stylesheet" href="styles.css?v=3">
+    <!-- Supabase JS Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            background-color: #000000;
+            color: #00ff00;
+            font-family: '000WebFont', monospace;
+            text-transform: lowercase;
+            padding: 20px;
+        }
+
+        .guestbook-container {
+            max-width: 650px;
+            margin: 40px auto;
+        }
+
+        .poem-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 40px;
+            border: 1px solid #00ff00;
+            padding: 20px;
+        }
+
+        input[type="text"], textarea {
+            background: #000;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: '000WebFont', monospace;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            font-family: '000WebFont', monospace;
+            cursor: pointer;
+            text-transform: lowercase;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .entry-card {
+            border: 1px dashed #00ff00;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #050505;
+        }
+
+        .entry-header {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+            border-bottom: 1px dotted #00ff00;
+            padding-bottom: 5px;
+        }
+
+        .entry-body {
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">null</a>
+        <a href="projects.html">projects</a>
+        <a href="archive.html">archive</a>
+        <a href="broadcast.html">broadcast</a>
+        <a href="cells.html">cells</a>
+        <a href="poetry.html">poetry</a>
+        <a href="entry.html">entry</a>
+    </nav>
+
+    <div class="guestbook-container">
+        <h2>broadcast entry log</h2>
+
+        <form class="poem-form" id="guestbook-form">
+            <input type="text" id="author-input" placeholder="handle / name" required>
+            <textarea id="poem-input" placeholder="leave a poem or packet transmission..." required></textarea>
+            <button type="submit" id="submit-btn">transmit packet</button>
+        </form>
+
+        <div id="entries-list">loading transmissions...</div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://zndzqourlurmfjljjwgt.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZHpxb3VybHVybWZqbGpqd2d0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NzYwODUsImV4cCI6MjEwNjQ1MjA4NX0.NCPW9H1Z6h0pYbpBsludjQ2cFb4chZEemvzoRV4ZihY"; 
+
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const form = document.getElementById('guestbook-form');
+        const entriesList = document.getElementById('entries-list');
+
+        async function fetchPoems() {
+            const { data, error } = await db
+                .from('guestbook')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                entriesList.innerHTML = `<p>Error loading logs: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                entriesList.innerHTML = `<p>No transmissions stored yet.</p>`;
+                return;
+            }
+
+            entriesList.innerHTML = data.map(item => `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        from: <strong>${escapeHtml(item.name)}</strong> | 
+                        ${new Date(item.created_at).toLocaleDateString()}
+                    </div>
+                    <div class="entry-body">${escapeHtml(item.poem)}</div>
+                </div>
+            `).join('');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerText = "transmitting...";
+            submitBtn.disabled = true;
+
+            const name = document.getElementById('author-input').value;
+            const poem = document.getElementById('poem-input').value;
+
+            const { error } = await db
+                .from('guestbook')
+                .insert([{ name, poem }]);
+
+            if (error) {
+                alert("Failed to submit: " + error.message);
+            } else {
+                form.reset();
+                fetchPoems();
+            }
+
+            submitBtn.innerText = "transmit packet";
+            submitBtn.disabled = false;
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        fetchPoems();
+    </script>
+</body>
+</html>
