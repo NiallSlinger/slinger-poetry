@@ -124,6 +124,10 @@ nav a {
   opacity: 1;
 }
 
+nav a.active {
+    text-decoration: underline;
+}
+
 /* Prevent nav overlap */
 section {
   margin-top: 100px;
