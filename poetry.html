@@ -111,6 +111,17 @@
             white-space: pre-wrap;
             line-height: 1.4;
         }
+		.ascii-gpel {
+    color: #00ff00;
+    font-family: monospace, 'Courier New', Courier; /* Forces a rigid grid */
+    white-space: pre;
+    text-align: center;
+    font-size: 1em;
+    line-height: 1;
+    margin: 15px auto;
+    overflow-x: auto; /* Prevents breaking on smaller screens */
+    user-select: none;
+}
     </style>
 </head>
 <body>
@@ -126,12 +137,12 @@
 </nav>
 
     <div class="guestbook-container">
-    <div class="ascii_gpel"><h2>
+    <div class="ascii-gpel">
 	
 		
   ______  _____  _______       
  |  ____ |_____] |______ |     
- |_____| |       |______ |_____ [guest poetry entry log]</h2>
+ |_____| |       |______ |_____ [guest poetry entry log]
     </div>
 
         <form class="poem-form" id="guestbook-form">
