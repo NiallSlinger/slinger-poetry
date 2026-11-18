@@ -6,11 +6,9 @@
     <title>SLINGER - poetry broadcast</title>
     
     <!-- CSP HEADER: CLEAN ALLOWLIST -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src 'self' https://*.supabase.co https://zndzqourlurmfjljjwgt.supabase.co wss://*.supabase.co data: blob:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src 'self' https://api.github.com data: blob:;">
     
     <link rel="stylesheet" href="styles.css?v=3">
-    <!-- Supabase JS Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         body {
@@ -112,16 +110,16 @@
             line-height: 1.4;
         }
 		.ascii-gpel {
-    color: #00ff00;
-    font-family: monospace, 'Courier New', Courier; /* Forces a rigid grid */
-    white-space: pre;
-    text-align: center;
-    font-size: 1em;
-    line-height: 1;
-    margin: 15px auto;
-    overflow: hidden !important; /* Prevents breaking on smaller screens */
-    user-select: none;
-}
+            color: #00ff00;
+            font-family: monospace, 'Courier New', Courier;
+            white-space: pre;
+            text-align: center;
+            font-size: 1em;
+            line-height: 1;
+            margin: 15px auto;
+            overflow: hidden !important;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
@@ -154,10 +152,12 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://zndzqourlurmfjljjwgt.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZHpxb3VybHVybWZqbGpqd2d0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NzYwODUsImV4cCI6MjEwNjQ1MjA4NX0.NCPW9H1Z6h0pYbpBsludjQ2cFb4chZEemvzoRV4ZihY"; 
-
-        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // =====================================================================
+        // GITHUB GIST CONFIGURATION FOR GPEL GUESTBOOK
+        // =====================================================================
+        const GITHUB_PAT = "YOUR_GPEL_GITHUB_PAT_HERE"; // e.g. ghp_...
+        const GIST_ID = "YOUR_GPEL_GIST_ID_HERE";       // e.g. a1b2c3d4e5f6...
+        const FILENAME = "guestbook_messages.json";
 
         const form = document.getElementById('guestbook-form');
         const entriesList = document.getElementById('entries-list');
@@ -169,30 +169,40 @@
         }
 
         async function fetchPoems() {
-            const { data, error } = await db
-                .from('guestbook')
-                .select('*')
-                .order('created_at', { ascending: false });
+            try {
+                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    headers: { 'Accept': 'application/vnd.github+json' }
+                });
 
-            if (error) {
-                entriesList.innerHTML = `<p>Error loading logs: ${error.message}</p>`;
-                return;
-            }
+                if (!res.ok) throw new Error("Failed to connect to transmission log.");
 
-            if (!data || data.length === 0) {
-                entriesList.innerHTML = `<p>No transmissions stored yet.</p>`;
-                return;
-            }
+                const data = await res.json();
+                const file = data.files && data.files[FILENAME];
 
-            entriesList.innerHTML = data.map(item => `
-                <div class="entry-card">
-                    <div class="entry-header">
-                        from: <strong>${escapeHtml(item.name)}</strong> | 
-                        ${new Date(item.created_at).toLocaleDateString()}
+                if (!file) {
+                    entriesList.innerHTML = `<p>No transmissions stored yet.</p>`;
+                    return;
+                }
+
+                const poems = JSON.parse(file.content);
+
+                if (!Array.isArray(poems) || poems.length === 0) {
+                    entriesList.innerHTML = `<p>No transmissions stored yet.</p>`;
+                    return;
+                }
+
+                entriesList.innerHTML = poems.map(item => `
+                    <div class="entry-card">
+                        <div class="entry-header">
+                            from: <strong>${escapeHtml(item.name)}</strong> | 
+                            ${item.created_at ? new Date(item.created_at).toLocaleDateString() : 'recent'}
+                        </div>
+                        <div class="entry-body">${escapeHtml(item.poem)}</div>
                     </div>
-                    <div class="entry-body">${escapeHtml(item.poem)}</div>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                entriesList.innerHTML = `<p>Error loading logs: ${error.message}</p>`;
+            }
         }
 
         form.addEventListener('submit', async (e) => {
@@ -201,22 +211,55 @@
             submitBtn.innerText = "transmitting...";
             submitBtn.disabled = true;
 
-            const name = document.getElementById('author-input').value;
-            const poem = document.getElementById('poem-input').value;
+            const name = document.getElementById('author-input').value.trim();
+            const poem = document.getElementById('poem-input').value.trim();
+            const newEntry = {
+                name,
+                poem,
+                created_at: new Date().toISOString()
+            };
 
-            const { error } = await db
-                .from('guestbook')
-                .insert([{ name, poem }]);
+            try {
+                // 1. Fetch current contents to avoid overwriting concurrent posts
+                const getRes = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    headers: { 'Accept': 'application/vnd.github+json' }
+                });
+                
+                if (!getRes.ok) throw new Error("Could not fetch existing log state.");
+                
+                const getData = await getRes.json();
+                const currentContent = getData.files[FILENAME] ? JSON.parse(getData.files[FILENAME].content) : [];
 
-            if (error) {
-                alert("Failed to submit: " + error.message);
-            } else {
+                // 2. Prepend new entry so newest shows up first
+                currentContent.unshift(newEntry);
+
+                // 3. Patch the Gist with the updated array
+                const patchRes = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Accept': 'application/vnd.github+json',
+                        'Authorization': `Bearer ${GITHUB_PAT}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        files: {
+                            [FILENAME]: {
+                                content: JSON.stringify(currentContent, null, 2)
+                            }
+                        }
+                    })
+                });
+
+                if (!patchRes.ok) throw new Error("Transmission failed server-side.");
+
                 form.reset();
                 fetchPoems();
+            } catch (error) {
+                alert("Failed to submit: " + error.message);
+            } finally {
+                submitBtn.innerText = "transmit";
+                submitBtn.disabled = false;
             }
-
-            submitBtn.innerText = "transmit packet";
-            submitBtn.disabled = false;
         });
 
         fetchPoems();
