@@ -151,12 +151,13 @@
         <div id="entries-list">loading transmissions...</div>
     </div>
 
-    <script>
+    
+      <script>
         // =====================================================================
         // GITHUB GIST CONFIGURATION FOR GPEL GUESTBOOK
         // =====================================================================
-        const GITHUB_PAT = "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"; // e.g. ghp_...
-        const GIST_ID = "d7eb97256bc08e01168d05203746d06d";       // e.g. a1b2c3d4e5f6...
+        const GITHUB_PAT = "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";
+        const GIST_ID = "d7eb97256bc08e01168d05203746d06d";
         const FILENAME = "guestbook_messages.json";
 
         const form = document.getElementById('guestbook-form');
@@ -174,13 +175,13 @@
                     headers: { 'Accept': 'application/vnd.github+json' }
                 });
 
-                if (!res.ok) throw new Error("Failed to connect to transmission log.");
+                if (!res.ok) throw new Error(`Failed to fetch Gist (${res.status})`);
 
                 const data = await res.json();
                 const file = data.files && data.files[FILENAME];
 
                 if (!file) {
-                    entriesList.innerHTML = `<p>No transmissions stored yet.</p>`;
+                    entriesList.innerHTML = `<p>No transmissions stored yet (check filename in Gist).</p>`;
                     return;
                 }
 
@@ -220,7 +221,7 @@
             };
 
             try {
-                // 1. Fetch current contents to avoid overwriting concurrent posts
+                // 1. Fetch current contents
                 const getRes = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                     headers: { 'Accept': 'application/vnd.github+json' }
                 });
@@ -230,10 +231,10 @@
                 const getData = await getRes.json();
                 const currentContent = getData.files[FILENAME] ? JSON.parse(getData.files[FILENAME].content) : [];
 
-                // 2. Prepend new entry so newest shows up first
+                // 2. Prepend new entry
                 currentContent.unshift(newEntry);
 
-                // 3. Patch the Gist with the updated array
+                // 3. Patch the Gist
                 const patchRes = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                     method: 'PATCH',
                     headers: {
@@ -250,11 +251,15 @@
                     })
                 });
 
-                if (!patchRes.ok) throw new Error("Transmission failed server-side.");
+                if (!patchRes.ok) {
+                    const errJson = await patchRes.json().catch(() => ({}));
+                    throw new Error(errJson.message || `HTTP ${patchRes.status}`);
+                }
 
                 form.reset();
                 fetchPoems();
             } catch (error) {
+                console.error("Transmission Error:", error);
                 alert("Failed to submit: " + error.message);
             } finally {
                 submitBtn.innerText = "transmit";
